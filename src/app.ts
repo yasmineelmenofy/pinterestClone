@@ -2,7 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { ApiError } from "./utils/ApiError";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express"; 
+import authRouter from "./routes/auth.routes";
 
 const app = express();
 
@@ -10,9 +11,9 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 // routes
-// app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter);
 // app.use("/api/images", imageRouter)
-app.all("*", (req: Request, res: Response, next: NextFunction) => {
+app.all("{*any}", (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(`Route ${req.originalUrl} not found`, 404));
 });
 

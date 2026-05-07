@@ -37,6 +37,45 @@ export const RegisterUser = async (
       },
     });
   } catch (error) {
-      next(error);
+    next(error);
   }
+};
+
+export const LoginUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { password, email } = req.body;
+    const found = await UserModel.findOne({ email: email });
+    if (!found) {
+      throw new ApiError("No account found register first", 401);
+    }
+    const comp = await bycrpt.compare(password, found.password);
+    if (!comp) {
+      throw new ApiError("Password is not correct", 401);
+    }
+    const token = generateToken(found.id);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.status(200).json({
+      message: "User logged successfully",
+      user: {
+        id: found._id,
+        userName: found.userName,
+        email: found.email,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const LogoutUser = (req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "logged out successfully" });
 };
