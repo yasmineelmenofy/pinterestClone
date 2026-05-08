@@ -38,18 +38,57 @@ export const uploadImage = async (
   }
 };
 
-
-export const getImages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-   try{ if (!req.user) {
-        throw new ApiError("not Authorized", 401);
+export const getImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new ApiError("not Authorized", 401);
     }
     const userId = req.user._id;
     const images = await imageModel.find({ user: userId }).populate("user");
     res.status(200).json({
-        message: "The images fetched successfully",
-        images
-    })
-   } catch (error) {
-       next(error);
+      message: "The images fetched successfully",
+      images,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getImageById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new ApiError("not Authorized", 401);
     }
-}
+    const userId = req.user._id;
+    if (!req.params.id) {
+      throw new ApiError("Please Enter the Id", 400);
+    }
+    const imageId = req.params.id;
+    const image = await imageModel.findById(imageId);
+    if (!image) {
+      throw new ApiError("Image not found", 404);
+    }
+    if (image.user.toString() !== userId.toString()) {
+      throw new ApiError("Not authorized to access this image", 403);
+    }
+    res.status(200).json({
+      message: "Image fetched successfully",
+      image: {
+        title: image.title,
+        description: image.description,
+        imageUrl: image.imageUrl,
+        user: image.user,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
