@@ -79,3 +79,52 @@ export const LogoutUser = (req: Request, res: Response) => {
   res.clearCookie("token");
   res.status(200).json({ message: "logged out successfully" });
 };
+
+export const getMe = (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new ApiError("Not Authorized", 401);
+  }
+  const user = req.user;
+  const { userName, email, profileImage } = user;
+  res.status(200).json({
+    message: "User fetched successfully",
+    user: {
+      userName,
+      email,
+      profileImage,
+    },
+  });
+};
+
+export const updateMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new ApiError("Not Authorized", 401);
+    }
+    const userId = req.user._id;
+    const { userName, email, profileImage } = req.body;
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { userName, email, profileImage },
+      { new: true },
+    );
+
+    if (!updatedUser) {
+      throw new ApiError("Failed to update user", 500);
+    }
+    res.status(200).json({
+      message: "information updated successfully",
+      user: {
+        userName,
+        email,
+        profileImage,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
