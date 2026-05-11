@@ -92,3 +92,39 @@ export const getImageById = async (
     next(error);
   }
 };
+
+export const deleteImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new ApiError("not Authorized", 401);
+    }
+    const userId = req.user._id;
+    if (!req.params.id) {
+      throw new ApiError("Please Enter Id", 400);
+    }
+    const imageId = req.params.id;
+    const image = await imageModel.findById(imageId);
+    if (!image) {
+      throw new ApiError("The image is not found", 404);
+    }
+    if (image.user.toString() !== userId.toString()) {
+      throw new ApiError("Not authorized to access this image", 403);
+    }
+    await imageModel.findByIdAndDelete(imageId);
+    res.status(200).json({
+      message: "Image deleted successfully",
+      image: {
+        title: image.title,
+        description: image.description,
+        imageUrl: image.imageUrl,
+        user: image.user,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
