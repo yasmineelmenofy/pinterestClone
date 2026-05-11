@@ -1,6 +1,7 @@
 import imageModel from "../models/Image.model";
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError";
+import { unzipSync } from "node:zlib";
 
 export const uploadImage = async (
   req: Request,
@@ -120,6 +121,53 @@ export const deleteImage = async (
       image: {
         title: image.title,
         description: image.description,
+        imageUrl: image.imageUrl,
+        user: image.user,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new ApiError("not Authorized", 401);
+    }
+    const userId = req.user._id;
+    if (!req.params.id) {
+      throw new ApiError("Please Enter id", 400);
+    }
+    const imageId = req.params.id;
+    const image = await imageModel.findById(imageId);
+    if (!image) {
+      throw new ApiError("The image is not found", 404);
+    }
+    if (image.user.toString() !== userId.toString()) {
+      throw new ApiError("Not authorized to access this image", 403);
+    }
+    const { title, description } = req.body;
+   const updatedImage= await imageModel.findByIdAndUpdate(
+      imageId,
+      {
+        title,
+        description,
+      },
+      { new: true },
+    );
+    if (!updatedImage) {
+      throw new ApiError("Failed to update image", 500);
+    }
+    res.status(200).json({
+      message: "Image updated successfully",
+      image: {
+        title: updatedImage.title,
+        description: updatedImage.description,
         imageUrl: image.imageUrl,
         user: image.user,
       },
