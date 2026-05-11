@@ -1,7 +1,6 @@
 import imageModel from "../models/Image.model";
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError";
-import { unzipSync } from "node:zlib";
 
 export const uploadImage = async (
   req: Request,
@@ -73,7 +72,7 @@ export const getImageById = async (
       throw new ApiError("Please Enter the Id", 400);
     }
     const imageId = req.params.id;
-    const image = await imageModel.findById(imageId);
+    const image = await imageModel.findById(imageId).populate("user");
     if (!image) {
       throw new ApiError("Image not found", 404);
     }
@@ -152,7 +151,7 @@ export const updateImage = async (
       throw new ApiError("Not authorized to access this image", 403);
     }
     const { title, description } = req.body;
-   const updatedImage= await imageModel.findByIdAndUpdate(
+    const updatedImage = await imageModel.findByIdAndUpdate(
       imageId,
       {
         title,
@@ -171,6 +170,22 @@ export const updateImage = async (
         imageUrl: image.imageUrl,
         user: image.user,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const images = await imageModel.find().populate("user");
+    res.status(200).json({
+      message: "The images fetched successfully",
+      images,
     });
   } catch (error) {
     next(error);

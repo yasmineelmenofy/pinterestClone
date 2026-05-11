@@ -5,6 +5,7 @@ import {
   getImageById,
   deleteImage,
   updateImage,
+  getAllImages,
 } from "../controllers/image.controller";
 import protect from "../middlewares/protect";
 import upload from "../config/multer";
@@ -16,4 +17,5 @@ router.get("/", protect, getImages);
 router.get("/:id", protect, getImageById);
 router.delete("/:id", protect, deleteImage);
 router.patch("/:id", protect, updateImage);
+router.get("/",getAllImages);
 export default router;
