@@ -26,14 +26,14 @@ A secure, production-quality REST API built with Node.js, Express, TypeScript, a
 
 ### Prerequisites
 
-- Node.js v18+
+- Node.js v20+
 - MongoDB (local or Atlas)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yasmineelmenofy/pinterestClone/tree/main/src
+git clone https://github.com/yasmineelmenofy/Pinterest-clone.git
 cd Pinterest-clone
 
 # Install dependencies
@@ -42,9 +42,15 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the root of the project:
+Copy the example environment file:
 
+```bash
+cp .env.example .env
 ```
+
+Then update it with your values:
+
+```env
 MONGO_URI=mongodb://localhost:27017/pinterest_clone
 JWT_SECRET=your_secret_key_here
 JWT_EXPIRES_IN=7d
@@ -81,7 +87,7 @@ npm start
 | Method | Endpoint     | Description                    | Protected |
 | ------ | ------------ | ------------------------------ | --------- |
 | GET    | `/`          | Get all images (homepage)      | ❌        |
-| GET    | `/my-images` | Get current user's images      | ✅        |
+| GET    | `/me` | Get current user's images      | ✅        |
 | GET    | `/:id`       | Get single image by id         | ✅        |
 | POST   | `/`          | Upload a new image             | ✅        |
 | PATCH  | `/:id`       | Update image title/description | ✅        |
